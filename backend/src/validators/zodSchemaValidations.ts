@@ -1,11 +1,17 @@
 import z from "zod";
 
-export const registerHandlerSchema = z
-  .object({
-    email: z.string().email().min(1).max(255),
-    password: z.string().min(1).max(255),
-    confirmPassword: z.string().min(1).max(255),
-    userAgent: z.string().optional(),
+const emailSchema = z.string().email().min(1).max(255);
+const passwordSchema = z.string().min(6).max(255);
+
+export const loginHandlerSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+  userAgent: z.string().optional(),
+});
+
+export const registerHandlerSchema = loginHandlerSchema
+  .extend({
+    confirmPassword: passwordSchema,
   })
   .refine(
     (data) => {

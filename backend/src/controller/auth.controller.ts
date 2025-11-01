@@ -1,13 +1,14 @@
-import { CREATED } from "../constants/http";
-import { createAccount } from "../services/auth.service";
+import { CREATED, OK } from "../constants/http";
+import { createAccount, loginUser } from "../services/auth.service";
 import catchError from "../utils/catchError";
 import { setAuthCookies } from "../utils/cookies";
-import { registerHandlerSchema } from "../validators/zodSchemaValidations";
-
-
+import {
+  loginHandlerSchema,
+  registerHandlerSchema,
+} from "../validators/zodSchemaValidations";
 
 export const registerHandler = catchError(async (req, res) => {
-  // validate the request 
+  // validate the request
   const request = registerHandlerSchema.parse({
     ...req.body,
     userAgent: req.headers["user-agent"],
@@ -19,4 +20,20 @@ export const registerHandler = catchError(async (req, res) => {
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(CREATED)
     .json(user);
+});
+
+export const loginHandler = catchError(async (req, res) => {
+  // validate the request
+  const request = loginHandlerSchema.parse({
+    ...req.body,
+    userAgent: req.headers["user-agent"],
+  });
+  // call the service
+  const { accessToken, refreshToken } = await loginUser(request);
+  // returns the response
+  return setAuthCookies({ res, accessToken, refreshToken })
+    .status(OK)
+    .json({
+      message: "Login Successful"
+    })
 });
